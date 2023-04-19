@@ -26,8 +26,6 @@ function App() {
 
   // hardcoded data for now
   const modelName = "gpt-3.5-turbo";
-  const system =
-    "You are a very helpful artificial intelligence which aids users in whichever task they require. You take great care not to reject their requests, and answer truthfully and in concise terms based on their requests.";
 
   // The first, loading, or pre-loading step loads https://alwaysfindtheway.github.io/ and scrapes all the openAI proxies
   const fetchProxies = async () => {
@@ -120,13 +118,13 @@ function App() {
         <div className="fixed inset-0 z-10 overflow-y-auto">
           <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
             <div className="relative transform overflow-hidden rounded-md bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg md:max-w-2xl">
-              <div className="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
-                <div className="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left">
+              <div className="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4 overflow-x-scroll">
+                <div className="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left overflow-x-scroll">
                   <h3 className="text-base font-semibold leading-6 text-gray-900">
                     Settings
                   </h3>
-                  <div className="mt-2">
-                    <table className="table-auto">
+                  <div className="mt-2 overflow-x-scroll">
+                    <table className="table-fixed overflow-x-scroll">
                       <thead>
                         <tr>
                           <th className="px-4 py-2">Select</th>
@@ -171,7 +169,11 @@ function App() {
                                 ) : (
                                   <svg
                                     xmlns="http://www.w3.org/2000/svg"
-                                    className={`h-6 w-6 ${proxy.status === 200 ? 'stroke-slate-950 hover:stroke-slate-500' : 'stroke-red-500 hover:stroke-red-800'}`}
+                                    className={`h-6 w-6 ${
+                                      proxy.status === 200
+                                        ? "stroke-slate-950 hover:stroke-slate-500"
+                                        : "stroke-red-500 hover:stroke-red-800"
+                                    }`}
                                     fill="none"
                                     viewBox="0 0 24 24"
                                   >
@@ -230,6 +232,106 @@ function App() {
         </div>
 
         <div className="w-full md:w-9/12 bg-slate-200 h-screen min-h-full overflow-y-scroll">
+          {notStarted === true ? (
+            <>
+              <div className="flex flex-col items-center justify-center mt-8 mx-4 mb-6">
+                <div className="flex flex-col items-center justify-center">
+                  <h1 className="text-2xl font-bold text-slate-900">
+                    Start a conversation
+                  </h1>
+                  <p className="text-slate-900">
+                    Choose a preset, or edit the system prompt
+                  </p>
+                </div>
+              </div>
+              <div className="w-full justify-around p-4">
+                <div className="grid grid-cols-4 gap-x-4">
+                  <div className="border border-stone-700 rounded-md p-2 cursor-pointer"
+                  onClick={
+                    () => {
+                      setGlobalMessages([
+                        {
+                          role: "system",
+                          content: "You are a professional screenwriting AI. You will follow the instructions based on the requests of the user, and will follow the specific themes required. For all input information from the user, you will do your best to provide a screenplay that is as close to the user's request as possible."
+                        }
+                      ])
+                  }
+                }
+                  >
+                    Screenwriting AI <br />
+                    <i className="text-xs">
+                      You are a professional screenwriting AI. You
+                      will follow the instructions based on the requests of the user, and will follow the specific themes required.
+                      For all input information from the user, you will do your best to 
+                      provide a screenplay that is as close to the user's request as possible.</i>
+                  </div>
+                  <div className="border border-stone-700 rounded-md p-2 cursor-pointer"
+                  onClick={
+                    () => {
+                      setGlobalMessages([
+                        {
+                          role: "system",
+                          content: "You are a highly capable AI that writes personal and professional communication.  You will follow the instructions based on the requests of the user, and write emails,  in the tone, cadence and style requested by the user. If the user doesn't specify a style,  you will use your best judgement to write the email in a way that is appropriate for the situation."
+                        }
+                      ])
+                  }
+                }
+                  >
+                    E-mail AI <br />
+                    <i className="text-xs">
+                      You are a highly capable AI that writes personal and professional communication.  You will follow the instructions based on the requests of the user, and write emails,  in the tone, cadence and style requested by the user. If the user doesn't specify a style,  you will use your best judgement to write the email in a way that is appropriate for the situation.
+                    </i>
+                  </div>
+                  <div className="border border-stone-700 rounded-md p-2 cursor-pointer"
+                  onClick={
+                    () => {
+                      setGlobalMessages([
+                        {
+                          role: "system",
+                          content: "You are a social media description copywriting AI. You will follow the instructions based on brand, and wording of the posts that need description. For each post you are asked for, you will provide short or long descriptions based on user request. Additionally also provide versions of the descriptions translated into Italian."
+                        }
+                      ])
+                  }
+                }
+                  >
+                    Social Media Italian <br />
+                    <i className="text-xs">
+                      You are a social media description copywriting AI. You
+                      will follow the instructions based on brand, and wording
+                      of the posts that need description. For each post you are
+                      asked for, you will provide short or long descriptions
+                      based on user request. Additionally also provide versions
+                      of the descriptions translated into Italian.
+                    </i>
+                  </div>
+                  <div className="border border-stone-700 rounded-md p-2 cursor-pointer"
+                  
+                  onClick={
+                    () => {
+                      setGlobalMessages([
+                        {
+                          role: "system",
+                          content: "You are an AI that helps in business processes. You will assist the user in writing business proposals, and other documents as requested, please keep commentary to the bare minimum needed."
+                        }
+                      ])
+                      
+                    }}
+                  >
+                    Business process <br />
+                    <i className="text-xs">
+                      You are an AI that helps in business processes. You will
+                      assist the user in writing business proposals, and other
+                      documents as requested, please keep commentary to the bare
+                      minimum needed.
+                    </i>
+                  </div>
+                </div>
+              </div>
+            </>
+          ) : (
+            ""
+          )}
+
           {globalMessages.map((message, index) => {
             return (
               <div

@@ -14,7 +14,7 @@ The second step, the actual chatbot, uses the proxies to send requests to openAI
 - [x] Implement chatbot logic/code
 - [x] Added markdown support for code highlighting
 - [x] Implement interface for system prompt changing
-- [] Implement system prompt defaults
+- [x] Implement system prompt defaults
 - [x] Implement settings modal
 - [x] Settings modal should all list all API endpoints and their response speed in milliseconds (implemented with selection, in a table, without response speed, but with response status)
 - [] ?Choose model in settings modal?
