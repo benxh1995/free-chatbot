@@ -1,3 +1,19 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.bg-main {
+    @apply bg-indigo-950;
+}
+
+.bg-btn {
+    @apply bg-indigo-700;
+}
+
+.bg-btn:hover{
+    @apply bg-indigo-500;
+}
+
+.bg-secondary{
+    @apply bg-indigo-900;
+}
