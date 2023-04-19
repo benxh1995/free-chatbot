@@ -114,14 +114,12 @@ function App() {
         let index = assignedSavedChats.findIndex(
             (chat) => chat.uuid === activatedUUID
         );
-        console.log("index",index)
 
         if(index === -1) {
             assignedSavedChats.push(activeChat);
         } else {
         assignedSavedChats[index] = activeChat;
         }
-        console.log("assignedSavedChats",assignedSavedChats)
         setSavedChats(assignedSavedChats);
 
         localStorage.setItem("savedChats", JSON.stringify(assignedSavedChats));
