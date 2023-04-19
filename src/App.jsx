@@ -16,7 +16,6 @@ function App() {
     const [savedChats, setSavedChats] = useState([]);
     const [activeChatID, setActiveChatID] = useState(null);
     const [assignedProxy, setAssignedProxy] = useState(null);
-
     const [globalMessages, setGlobalMessages] = useState([
         {
             role: "system",
@@ -75,53 +74,57 @@ function App() {
 
     const continueCompletion = async (message) => {
         // if activated uuid is null, create new chat
-        let activatedUUID = notStarted
-            ? null
-            : savedChats.find((chat) => chat.uuid === activeChatID);
-        if (notStarted === true) {
+        let activatedUUID = notStarted ? null : activeChatID === null ? null : savedChats.find((chat) => chat.uuid === activeChatID).uuid;
+        // initialize empty chat
+        if (activatedUUID === null) {
             let chatObj = {
                 uuid: URL.createObjectURL(new Blob()).substr(-36),
                 messages: globalMessages,
             };
             setActiveChatID(chatObj.uuid);
             activatedUUID = chatObj.uuid;
-            let savedChatsCopy = savedChats;
-            savedChatsCopy.push(chatObj);
-            setSavedChats(savedChatsCopy);
-            localStorage.setItem("savedChats", JSON.stringify(savedChatsCopy));
+            setSavedChats([...savedChats, chatObj]);
+            localStorage.setItem("savedChats", JSON.stringify([...savedChats, chatObj]));
         }
-
+        
         // set globals for hiding suggestions and starting "thinking part"
         setNotStarted(false);
         setLoading(true);
 
-        // first get whole message history
+        // first get whole message history and append new message
         let messageHistory = globalMessages;
-        // then add new message to message history
         messageHistory.push({
             role: "user",
             content: message,
         });
         setGlobalMessages(messageHistory.slice(0));
 
-        //update savedChat messages
-        let savedChatsCopy = savedChats;
-        let activeChat = savedChatsCopy.find((chat) => {
-            return chat.uuid == activatedUUID.uuid;
-        });
+        // update savedChat messages with messageHistory where uuid === activatedUUID
+        let activeChat = savedChats.find(
+            (chat) => chat.uuid === activatedUUID
+        );
         if (activeChat === undefined) {
             activeChat = {
-                uuid: activatedUUID.uuid,
+                uuid: activatedUUID,
                 messages: messageHistory,
             };
         }
 
-        savedChatsCopy.find(
-            (chat) => chat.uuid === activatedUUID.uuid
-        ).messages = messageHistory;
+        let assignedSavedChats = Object.assign([], savedChats);
+        let index = assignedSavedChats.findIndex(
+            (chat) => chat.uuid === activatedUUID
+        );
+        console.log("index",index)
 
-        setSavedChats(savedChatsCopy);
-        localStorage.setItem("savedChats", JSON.stringify(savedChatsCopy));
+        if(index === -1) {
+            assignedSavedChats.push(activeChat);
+        } else {
+        assignedSavedChats[index] = activeChat;
+        }
+        console.log("assignedSavedChats",assignedSavedChats)
+        setSavedChats(assignedSavedChats);
+
+        localStorage.setItem("savedChats", JSON.stringify(assignedSavedChats));
 
         // then send POST request to proxies[3]
         let postRequest = await axios
@@ -138,26 +141,31 @@ function App() {
                 setGlobalMessages(messageHistory.slice(0));
 
                 //update savedChat messages
-                let savedChatsCopy = savedChats;
-                let activeChat = savedChatsCopy.find(
-                    (chat) => chat.uuid === activeChatID
+                
+                let activeChat = savedChats.find(
+                    (chat) => chat.uuid === activatedUUID
                 );
                 if (activeChat === undefined) {
                     activeChat = {
-                        uuid: activeChatID,
+                        uuid: activatedUUID,
                         messages: [],
                     };
                 }
                 activeChat.messages = messageHistory;
-                savedChatsCopy.find(
-                    (chat) => chat.uuid === activeChatID
-                ).messages = messageHistory;
 
-                setSavedChats(savedChatsCopy);
-                localStorage.setItem(
-                    "savedChats",
-                    JSON.stringify(savedChatsCopy)
+                let assignedSavedChats = Object.assign([], savedChats);
+                let index = assignedSavedChats.findIndex(
+                    (chat) => chat.uuid === activatedUUID
                 );
+               
+                if(index === -1) {
+                    assignedSavedChats.push(activeChat);
+                } else {
+                assignedSavedChats[index] = activeChat;
+                }
+                setSavedChats(assignedSavedChats);
+
+                localStorage.setItem("savedChats", JSON.stringify(assignedSavedChats));
             })
             .finally(() => {
                 setLoading(false);
