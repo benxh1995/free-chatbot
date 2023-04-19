@@ -245,54 +245,113 @@ function App() {
                 </div>
               </div>
               <div className="w-full justify-around p-4">
-                <div className="grid grid-cols-4 gap-x-4">
-                  <div className="border border-stone-700 rounded-md p-2 cursor-pointer"
-                  onClick={
-                    () => {
+                <div className="grid grid-cols-5 gap-x-4 gap-y-4">
+                  <div
+                    className="border border-stone-700 rounded-md p-2 cursor-pointer"
+                    onClick={() => {
                       setGlobalMessages([
                         {
                           role: "system",
-                          content: "You are a professional screenwriting AI. You will follow the instructions based on the requests of the user, and will follow the specific themes required. For all input information from the user, you will do your best to provide a screenplay that is as close to the user's request as possible."
-                        }
-                      ])
-                  }
-                }
+                          content:
+                            "You are a professional programmer companion AI. You will follow user requests in order to prepare various programming and coding tasks for the user. You will separate each function in its own code block when returning it to the user, and you will closely follow users instructions for coding and preparing code. You may be asked by users to provide algorithms or solutions to technical problems. You will advise the user as well as prepare boilerplate code for the user when asked do to so. Generally, you will prepare code, and only offer comments if asked to do so.",
+                        },
+                      ]);
+                    }}
+                  >
+                    Programmer Companion <br />
+                    <i className="text-xs">
+                      You are a professional programmer companion AI. You will
+                      follow user requests in order to prepare various
+                      programming and coding tasks for the user. You will
+                      separate each function in its own code block when
+                      returning it to the user, and you will closely follow
+                      users instructions for coding and preparing code. You may
+                      be asked by users to provide algorithms or solutions to
+                      technical problems. You will advise the user as well as
+                      prepare boilerplate code for the user when asked do to so.
+                      Generally, you will prepare code, and only offer comments
+                      if asked to do so.
+                    </i>
+                  </div>
+                  <div
+                    className="border border-stone-700 rounded-md p-2 cursor-pointer"
+                    onClick={() => {
+                      setGlobalMessages([
+                        {
+                          role: "system",
+                          content:
+                            "You are a professional Solidity Auditing AI. You Audit the smart contracts and functions in solidity that the users will send. For all input information from the user, you will do your best to  provide a security and best-practices audit that will be as useful as possible. Give lots of examples and explanations why some course of action is better.",
+                        },
+                      ]);
+                    }}
+                  >
+                    Solidity Auditor <br />
+                    <i className="text-xs">
+                      You are a professional Solidity Auditing AI. You Audit the
+                      smart contracts and functions in solidity that the users
+                      will send. For all input information from the user, you
+                      will do your best to provide a security and best-practices
+                      audit that will be as useful as possible. Give lots of
+                      examples and explanations why some course of action is
+                      better.
+                    </i>
+                  </div>
+                  <div
+                    className="border border-stone-700 rounded-md p-2 cursor-pointer"
+                    onClick={() => {
+                      setGlobalMessages([
+                        {
+                          role: "system",
+                          content:
+                            "You are a professional screenwriting AI. You will follow the instructions based on the requests of the user, and will follow the specific themes required. For all input information from the user, you will do your best to provide a screenplay that is as close to the user's request as possible.",
+                        },
+                      ]);
+                    }}
                   >
                     Screenwriting AI <br />
                     <i className="text-xs">
-                      You are a professional screenwriting AI. You
-                      will follow the instructions based on the requests of the user, and will follow the specific themes required.
-                      For all input information from the user, you will do your best to 
-                      provide a screenplay that is as close to the user's request as possible.</i>
+                      You are a professional screenwriting AI. You will follow
+                      the instructions based on the requests of the user, and
+                      will follow the specific themes required. For all input
+                      information from the user, you will do your best to
+                      provide a screenplay that is as close to the user's
+                      request as possible.
+                    </i>
                   </div>
-                  <div className="border border-stone-700 rounded-md p-2 cursor-pointer"
-                  onClick={
-                    () => {
+                  <div
+                    className="border border-stone-700 rounded-md p-2 cursor-pointer"
+                    onClick={() => {
                       setGlobalMessages([
                         {
                           role: "system",
-                          content: "You are a highly capable AI that writes personal and professional communication.  You will follow the instructions based on the requests of the user, and write emails,  in the tone, cadence and style requested by the user. If the user doesn't specify a style,  you will use your best judgement to write the email in a way that is appropriate for the situation."
-                        }
-                      ])
-                  }
-                }
+                          content:
+                            "You are a highly capable AI that writes personal and professional communication.  You will follow the instructions based on the requests of the user, and write emails,  in the tone, cadence and style requested by the user. If the user doesn't specify a style,  you will use your best judgement to write the email in a way that is appropriate for the situation.",
+                        },
+                      ]);
+                    }}
                   >
                     E-mail AI <br />
                     <i className="text-xs">
-                      You are a highly capable AI that writes personal and professional communication.  You will follow the instructions based on the requests of the user, and write emails,  in the tone, cadence and style requested by the user. If the user doesn't specify a style,  you will use your best judgement to write the email in a way that is appropriate for the situation.
+                      You are a highly capable AI that writes personal and
+                      professional communication. You will follow the
+                      instructions based on the requests of the user, and write
+                      emails, in the tone, cadence and style requested by the
+                      user. If the user doesn't specify a style, you will use
+                      your best judgement to write the email in a way that is
+                      appropriate for the situation.
                     </i>
                   </div>
-                  <div className="border border-stone-700 rounded-md p-2 cursor-pointer"
-                  onClick={
-                    () => {
+                  <div
+                    className="border border-stone-700 rounded-md p-2 cursor-pointer"
+                    onClick={() => {
                       setGlobalMessages([
                         {
                           role: "system",
-                          content: "You are a social media description copywriting AI. You will follow the instructions based on brand, and wording of the posts that need description. For each post you are asked for, you will provide short or long descriptions based on user request. Additionally also provide versions of the descriptions translated into Italian."
-                        }
-                      ])
-                  }
-                }
+                          content:
+                            "You are a social media description copywriting AI. You will follow the instructions based on brand, and wording of the posts that need description. For each post you are asked for, you will provide short or long descriptions based on user request. Additionally also provide versions of the descriptions translated into Italian.",
+                        },
+                      ]);
+                    }}
                   >
                     Social Media Italian <br />
                     <i className="text-xs">
@@ -304,17 +363,16 @@ function App() {
                       of the descriptions translated into Italian.
                     </i>
                   </div>
-                  <div className="border border-stone-700 rounded-md p-2 cursor-pointer"
-                  
-                  onClick={
-                    () => {
+                  <div
+                    className="border border-stone-700 rounded-md p-2 cursor-pointer"
+                    onClick={() => {
                       setGlobalMessages([
                         {
                           role: "system",
-                          content: "You are an AI that helps in business processes. You will assist the user in writing business proposals, and other documents as requested, please keep commentary to the bare minimum needed."
-                        }
-                      ])
-                      
+                          content:
+                            "You are an AI that helps in business processes. You will assist the user in writing business proposals, and other documents as requested, please keep commentary to the bare minimum needed.",
+                        },
+                      ]);
                     }}
                   >
                     Business process <br />
