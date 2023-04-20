@@ -74,7 +74,11 @@ function App() {
 
     const continueCompletion = async (message) => {
         // if activated uuid is null, create new chat
-        let activatedUUID = notStarted ? null : activeChatID === null ? null : savedChats.find((chat) => chat.uuid === activeChatID).uuid;
+        let activatedUUID = notStarted
+            ? null
+            : activeChatID === null
+            ? null
+            : savedChats.find((chat) => chat.uuid === activeChatID).uuid;
         // initialize empty chat
         if (activatedUUID === null) {
             let chatObj = {
@@ -84,9 +88,12 @@ function App() {
             setActiveChatID(chatObj.uuid);
             activatedUUID = chatObj.uuid;
             setSavedChats([...savedChats, chatObj]);
-            localStorage.setItem("savedChats", JSON.stringify([...savedChats, chatObj]));
+            localStorage.setItem(
+                "savedChats",
+                JSON.stringify([...savedChats, chatObj])
+            );
         }
-        
+
         // set globals for hiding suggestions and starting "thinking part"
         setNotStarted(false);
         setLoading(true);
@@ -100,9 +107,7 @@ function App() {
         setGlobalMessages(messageHistory.slice(0));
 
         // update savedChat messages with messageHistory where uuid === activatedUUID
-        let activeChat = savedChats.find(
-            (chat) => chat.uuid === activatedUUID
-        );
+        let activeChat = savedChats.find((chat) => chat.uuid === activatedUUID);
         if (activeChat === undefined) {
             activeChat = {
                 uuid: activatedUUID,
@@ -115,10 +120,10 @@ function App() {
             (chat) => chat.uuid === activatedUUID
         );
 
-        if(index === -1) {
+        if (index === -1) {
             assignedSavedChats.push(activeChat);
         } else {
-        assignedSavedChats[index] = activeChat;
+            assignedSavedChats[index] = activeChat;
         }
         setSavedChats(assignedSavedChats);
 
@@ -139,7 +144,7 @@ function App() {
                 setGlobalMessages(messageHistory.slice(0));
 
                 //update savedChat messages
-                
+
                 let activeChat = savedChats.find(
                     (chat) => chat.uuid === activatedUUID
                 );
@@ -155,15 +160,18 @@ function App() {
                 let index = assignedSavedChats.findIndex(
                     (chat) => chat.uuid === activatedUUID
                 );
-               
-                if(index === -1) {
+
+                if (index === -1) {
                     assignedSavedChats.push(activeChat);
                 } else {
-                assignedSavedChats[index] = activeChat;
+                    assignedSavedChats[index] = activeChat;
                 }
                 setSavedChats(assignedSavedChats);
 
-                localStorage.setItem("savedChats", JSON.stringify(assignedSavedChats));
+                localStorage.setItem(
+                    "savedChats",
+                    JSON.stringify(assignedSavedChats)
+                );
             })
             .finally(() => {
                 setLoading(false);
@@ -190,8 +198,7 @@ function App() {
             <div
                 className={`relative z-10 ${openSettings ? "block" : "hidden"}`}
                 role="dialog"
-                aria-modal="true"
-            >
+                aria-modal="true">
                 <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
 
                 <div className="fixed inset-0 z-10 overflow-y-auto">
@@ -240,16 +247,14 @@ function App() {
                                                                                 }
                                                                             );
                                                                         }
-                                                                    }}
-                                                                >
+                                                                    }}>
                                                                     {assignedProxy?.proxy ===
                                                                     proxy.proxy ? (
                                                                         <svg
                                                                             xmlns="http://www.w3.org/2000/svg"
                                                                             className="h-6 w-6 stroke-lime-500 hover:stroke-lime-800"
                                                                             fill="none"
-                                                                            viewBox="0 0 24 24"
-                                                                        >
+                                                                            viewBox="0 0 24 24">
                                                                             <path
                                                                                 strokeLinecap="round"
                                                                                 strokeLinejoin="round"
@@ -269,8 +274,7 @@ function App() {
                                                                                     : "stroke-red-500 hover:stroke-red-800"
                                                                             }`}
                                                                             fill="none"
-                                                                            viewBox="0 0 24 24"
-                                                                        >
+                                                                            viewBox="0 0 24 24">
                                                                             <path
                                                                                 strokeLinecap="round"
                                                                                 strokeLinejoin="round"
@@ -304,8 +308,7 @@ function App() {
                                     className="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto"
                                     onClick={() =>
                                         setOpenSettings(!openSettings)
-                                    }
-                                >
+                                    }>
                                     Close
                                 </button>
                             </div>
@@ -323,8 +326,7 @@ function App() {
                     <div className="flex items-center">
                         <button
                             className="bg-btn text-white font-bold py-2 px-4 rounded-md mr-4"
-                            onClick={() => setOpenSettings(!openSettings)}
-                        >
+                            onClick={() => setOpenSettings(!openSettings)}>
                             Settings
                         </button>
 
@@ -341,8 +343,7 @@ function App() {
                                 ]);
                                 setInitLoading(true);
                                 setNotStarted(true);
-                            }}
-                        >
+                            }}>
                             New chat
                         </button>
                     </div>
@@ -383,8 +384,7 @@ function App() {
                                             }).messages;
 
                                             setGlobalMessages(parsedMSGS);
-                                        }}
-                                    >
+                                        }}>
                                         <h1 className="text-lg font-bold text-white">
                                             {chat.uuid}
                                         </h1>
@@ -432,8 +432,7 @@ function App() {
                                                         "You are a professional programmer companion AI. You will follow user requests in order to prepare various programming and coding tasks for the user. You will separate each function in its own code block when returning it to the user, and you will closely follow users instructions for coding and preparing code. You may be asked by users to provide algorithms or solutions to technical problems. You will advise the user as well as prepare boilerplate code for the user when asked do to so. Generally, you will prepare code, and only offer comments if asked to do so.",
                                                 },
                                             ]);
-                                        }}
-                                    >
+                                        }}>
                                         Programmer Companion <br />
                                         <i className="text-xs">
                                             You are a professional programmer
@@ -465,8 +464,7 @@ function App() {
                                                         "You are a professional Solidity Auditing AI. You Audit the smart contracts and functions in solidity that the users will send. For all input information from the user, you will do your best to  provide a security and best-practices audit that will be as useful as possible. Give lots of examples and explanations why some course of action is better.",
                                                 },
                                             ]);
-                                        }}
-                                    >
+                                        }}>
                                         Solidity Auditor <br />
                                         <i className="text-xs">
                                             You are a professional Solidity
@@ -492,8 +490,7 @@ function App() {
                                                         "You are a professional screenwriting AI. You will follow the instructions based on the requests of the user, and will follow the specific themes required. For all input information from the user, you will do your best to provide a screenplay that is as close to the user's request as possible.",
                                                 },
                                             ]);
-                                        }}
-                                    >
+                                        }}>
                                         Screenwriting AI <br />
                                         <i className="text-xs">
                                             You are a professional screenwriting
@@ -517,8 +514,7 @@ function App() {
                                                         "You are a highly capable AI that writes personal and professional communication.  You will follow the instructions based on the requests of the user, and write emails,  in the tone, cadence and style requested by the user. If the user doesn't specify a style,  you will use your best judgement to write the email in a way that is appropriate for the situation.",
                                                 },
                                             ]);
-                                        }}
-                                    >
+                                        }}>
                                         E-mail AI <br />
                                         <i className="text-xs">
                                             You are a highly capable AI that
@@ -544,8 +540,7 @@ function App() {
                                                         "You are a social media description copywriting AI. You will follow the instructions based on brand, and wording of the posts that need description. For each post you are asked for, you will provide short or long descriptions based on user request. Additionally also provide versions of the descriptions translated into Italian.",
                                                 },
                                             ]);
-                                        }}
-                                    >
+                                        }}>
                                         Social Media Italian <br />
                                         <i className="text-xs">
                                             You are a social media description
@@ -570,8 +565,7 @@ function App() {
                                                         "You are an AI that helps in business processes. You will assist the user in writing business proposals, and other documents as requested, please keep commentary to the bare minimum needed.",
                                                 },
                                             ]);
-                                        }}
-                                    >
+                                        }}>
                                         Business process <br />
                                         <i className="text-xs">
                                             You are an AI that helps in business
@@ -599,8 +593,7 @@ function App() {
                                         : message.role === "assistant"
                                         ? "bg-yellow-100"
                                         : "bg-slate-100"
-                                }`}
-                            >
+                                }`}>
                                 {message.role === "system" &&
                                 notStarted === true ? (
                                     <>
@@ -642,8 +635,7 @@ function App() {
                                                     );
                                                     e.target.contentEditable = false;
                                                 }
-                                            }}
-                                        >
+                                            }}>
                                             {message.content}
                                         </p>
                                     </>
@@ -680,8 +672,7 @@ function App() {
                 />
                 <button
                     className="bg-btn text-white font-bold py-2 px-4 rounded-md ml-4"
-                    onClick={() => continueCompletion(typedMessage)}
-                >
+                    onClick={() => continueCompletion(typedMessage)}>
                     Send
                 </button>
             </div>
