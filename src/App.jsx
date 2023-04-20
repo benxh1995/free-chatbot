@@ -72,6 +72,26 @@ function App() {
         return allProxies;
     };
 
+    const generateName = async(messagesObj) =>{
+       let messageCpy = Object.assign([], messagesObj);
+        messageCpy.push({
+            role: "user",
+            content: "Generate a name for this chat, max. 4 words",
+        });
+        let name = await axios
+            .post(assignedProxy.proxy + "/chat/completions", {
+                model: modelName,
+                messages: messageCpy,
+            })
+            .then((response) => {
+                return response.data.choices[0].message.content;
+            })
+            .catch((error) => {
+                return "Error";
+            });
+        return name;
+    }
+
     const continueCompletion = async (message) => {
         // if activated uuid is null, create new chat
         let activatedUUID = notStarted
@@ -128,7 +148,13 @@ function App() {
         setSavedChats(assignedSavedChats);
 
         localStorage.setItem("savedChats", JSON.stringify(assignedSavedChats));
-
+        if(activeChat.name === undefined){
+            let name = await generateName(messageHistory);
+            activeChat.name = name;
+            assignedSavedChats[index] = activeChat;
+            setSavedChats(assignedSavedChats);
+            localStorage.setItem("savedChats", JSON.stringify(assignedSavedChats));
+        }
         // then send POST request to proxies[3]
         let postRequest = await axios
             .post(assignedProxy.proxy + "/chat/completions", {
@@ -368,7 +394,7 @@ function App() {
                                 {savedChats.map((chat, index) => (
                                     <div
                                         key={index}
-                                        className={`flex flex-col items-center justify-center w-full mb-4 p-4 rounded-md cursor-pointer`}
+                                        className={`flex flex-col items-center justify-center w-full mb-4 p-4 rounded-md cursor-pointer border-white border`}
                                         onClick={() => {
                                             setNotStarted(false);
                                             setActiveChatID(chat.uuid);
@@ -385,8 +411,8 @@ function App() {
 
                                             setGlobalMessages(parsedMSGS);
                                         }}>
-                                        <h1 className="text-lg font-bold text-white">
-                                            {chat.uuid}
+                                        <h1 className="text-md font-bold text-white">
+                                          {chat.name ? chat.name : chat.uuid}
                                         </h1>
                                     </div>
                                 ))}
