@@ -460,6 +460,31 @@ function App() {
                                           </div>
                                     </div>
                                 ))}
+
+                                <div className="flex flex-row justify-between w-full mb-4 p-4 rounded-md cursor-pointer border-white border">
+                                    <button className="bg-btn text-white font-bold py-2 px-4 rounded-md mr-4" onClick={() => {
+                                        let parsedMSGS = JSON.parse(
+                                            localStorage.getItem(
+                                                "savedChats"
+                                            )
+                                        );
+                                        let dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(parsedMSGS));
+                                        let downloadAnchorNode = document.createElement('a');
+                                        downloadAnchorNode.setAttribute("href",     dataStr);
+                                        downloadAnchorNode.setAttribute("download", "savedChats.json");
+                                        document.body.appendChild(downloadAnchorNode); // required for firefox
+                                        downloadAnchorNode.click();
+                                        downloadAnchorNode.remove();
+                                    }}>
+                                        ⬇️ all chats
+                                    </button>
+                                    <button className="bg-btn text-white font-bold py-2 px-4 rounded-md mr-4" onClick={() => {
+                                        localStorage.setItem("savedChats", JSON.stringify([]));
+                                        setSavedChats([]);
+                                    }}>
+                                        ❌ all chats
+                                    </button>
+                                    </div>
                             </div>
                         </>
                     ) : (
