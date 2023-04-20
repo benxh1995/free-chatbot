@@ -394,7 +394,7 @@ function App() {
                                 {savedChats.map((chat, index) => (
                                     <div
                                         key={index}
-                                        className={`flex flex-col items-center justify-center w-full mb-4 p-4 rounded-md cursor-pointer border-white border`}
+                                        className={`flex flex-row justify-between w-full mb-4 p-4 rounded-md cursor-pointer border-white border`}
                                         onClick={() => {
                                             setNotStarted(false);
                                             setActiveChatID(chat.uuid);
@@ -411,9 +411,36 @@ function App() {
 
                                             setGlobalMessages(parsedMSGS);
                                         }}>
+                                          <div className="flex flex-col">
                                         <h1 className="text-md font-bold text-white">
                                           {chat.name ? chat.name : chat.uuid}
                                         </h1>
+                                        <p className="text-white text-sm">
+                                            {chat.messages.length -1} messages
+                                        </p>
+                                        </div>
+                                        <div className="flex flex-row items-center justify-center">
+                                          <button className="bg-btn text-white font-bold py-2 px-4 rounded-md mr-4 mt-4" onClick={() => {
+                                              let parsedMSGS = JSON.parse(
+                                                localStorage.getItem(
+                                                    "savedChats"
+                                                )
+                                            ).find((findChat) => {
+                                                return (
+                                                    findChat.uuid === chat.uuid
+                                                );
+                                            }).messages;
+                                            let dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(parsedMSGS));
+                                            let downloadAnchorNode = document.createElement('a');
+                                            downloadAnchorNode.setAttribute("href",     dataStr);
+                                            downloadAnchorNode.setAttribute("download", chat.name + ".json");
+                                            document.body.appendChild(downloadAnchorNode); // required for firefox
+                                            downloadAnchorNode.click();
+                                            downloadAnchorNode.remove();
+                                          }}>
+                                            ⬇️
+                                          </button>
+                                          </div>
                                     </div>
                                 ))}
                             </div>
