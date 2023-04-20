@@ -26,6 +26,11 @@ Optional:
 - [-] Implement auto-modes for the creation of LLM instruction tuning datasets (should be handled in a different kind of app)
 - [] Implement Langchain or AutoGPT for advanced functionality (e.g. plugins, browsing the internet, summarization of texts, and multi agents)
 
+Either:
+- [] Implement LangChain
+- [] Implement Memory Module (summary of the conversation after n-turns, or/and after reaching x tokens in total, in order to lower the number of context tokens, and addittionaly, a special kind of "task list" memory)
+- [] Implement "tool" use (e.g. summarization, browsing the internet, using code, using calculators, etc)
+
 ## How to use
 ```
 git clone https://github.com/benxh1995/free-chatbot.git
