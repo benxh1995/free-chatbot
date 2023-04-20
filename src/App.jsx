@@ -420,7 +420,7 @@ function App() {
                                         </p>
                                         </div>
                                         <div className="flex flex-row items-center justify-center">
-                                          <button className="bg-btn text-white font-bold py-2 px-4 rounded-md mr-4 mt-4" onClick={() => {
+                                          <button className="bg-btn text-xs py-2 px-4 rounded-md mr-4 mt-4" onClick={() => {
                                               let parsedMSGS = JSON.parse(
                                                 localStorage.getItem(
                                                     "savedChats"
@@ -439,6 +439,23 @@ function App() {
                                             downloadAnchorNode.remove();
                                           }}>
                                             ⬇️
+                                          </button>
+
+                                          <button className="bg-btn  text-xs py-2 px-4 rounded-md mr-4 mt-4" onClick={() => {
+                                            let parsedMSGS = JSON.parse(
+                                                localStorage.getItem(
+                                                    "savedChats"
+                                                ) 
+                                            ).filter((findChat) => {
+
+                                                return (
+                                                    findChat.uuid !== chat.uuid
+                                                );
+                                            });
+                                            localStorage.setItem("savedChats", JSON.stringify(parsedMSGS));
+                                            setSavedChats(parsedMSGS);
+                                          }}>
+                                            ❌
                                           </button>
                                           </div>
                                     </div>
