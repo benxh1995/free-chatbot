@@ -22,8 +22,8 @@ The second step, the actual chatbot, uses the proxies to send requests to openAI
 Optional:
 - [x] Implement a way to save the chatbot's responses to local storage
 - [x] Implement a name to "name" the conversations, and make a function to summarize the conversation to a title using the LLM
-- [] Implement a way to save the chatbot's responses to a file (to allow for a rapid creationg of datasets?)
-- [] Implement auto-modes for the creation of LLM instruction tuning datasets
+- [x] Implement a way to save the chatbot's responses to a file (to allow for a rapid creationg of datasets?)
+- [-] Implement auto-modes for the creation of LLM instruction tuning datasets (should be handled in a different kind of app)
 - [] Implement Langchain or AutoGPT for advanced functionality (e.g. plugins, browsing the internet, summarization of texts, and multi agents)
 
 ## How to use
