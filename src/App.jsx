@@ -5,6 +5,7 @@ import axios from "axios";
 import rehypeHighlight from "rehype-highlight/lib";
 import "./App.css";
 import { ReactMarkdown } from "react-markdown/lib/react-markdown";
+import { Toaster, toast } from "react-hot-toast";
 
 function App() {
     const [openSettings, setOpenSettings] = useState(false);
@@ -34,15 +35,11 @@ function App() {
         let text = response.data;
         // isolate each iframe from text
         const iframes = text.match(/<iframe.*?src="(.*?)".*?>/g);
-        const iframeSrcs = iframes.map(
-            (iframe) => iframe.match(/src="(.*?)"/)[1]
-        );
+        const iframeSrcs = iframes.map((iframe) => iframe.match(/src="(.*?)"/)[1]);
 
         // add /proxy/openai to each iframe if src ends with /, else add /proxy/openai
         const proxySrcs = iframeSrcs.map((src) =>
-            src.endsWith("/")
-                ? src + "proxy/openai/v1"
-                : src + "/proxy/openai/v1"
+            src.endsWith("/") ? src + "proxy/openai/v1" : src + "/proxy/openai/v1"
         );
 
         let allProxies = [];
@@ -72,8 +69,8 @@ function App() {
         return allProxies;
     };
 
-    const generateName = async(messagesObj) =>{
-       let messageCpy = Object.assign([], messagesObj);
+    const generateName = async (messagesObj) => {
+        let messageCpy = Object.assign([], messagesObj);
         messageCpy.push({
             role: "user",
             content: "Generate a name for this chat, max. 4 words",
@@ -90,7 +87,7 @@ function App() {
                 return "Error";
             });
         return name;
-    }
+    };
 
     const continueCompletion = async (message) => {
         // if activated uuid is null, create new chat
@@ -108,10 +105,7 @@ function App() {
             setActiveChatID(chatObj.uuid);
             activatedUUID = chatObj.uuid;
             setSavedChats([...savedChats, chatObj]);
-            localStorage.setItem(
-                "savedChats",
-                JSON.stringify([...savedChats, chatObj])
-            );
+            localStorage.setItem("savedChats", JSON.stringify([...savedChats, chatObj]));
         }
 
         // set globals for hiding suggestions and starting "thinking part"
@@ -136,9 +130,7 @@ function App() {
         }
 
         let assignedSavedChats = Object.assign([], savedChats);
-        let index = assignedSavedChats.findIndex(
-            (chat) => chat.uuid === activatedUUID
-        );
+        let index = assignedSavedChats.findIndex((chat) => chat.uuid === activatedUUID);
 
         if (index === -1) {
             assignedSavedChats.push(activeChat);
@@ -148,7 +140,7 @@ function App() {
         setSavedChats(assignedSavedChats);
 
         localStorage.setItem("savedChats", JSON.stringify(assignedSavedChats));
-        if(activeChat.name === undefined){
+        if (activeChat.name === undefined) {
             let name = await generateName(messageHistory);
             activeChat.name = name;
             assignedSavedChats[index] = activeChat;
@@ -156,12 +148,14 @@ function App() {
             localStorage.setItem("savedChats", JSON.stringify(assignedSavedChats));
         }
         // then send POST request to proxies[3]
+
         let postRequest = await axios
             .post(assignedProxy.proxy + "/chat/completions", {
                 model: modelName,
                 messages: messageHistory,
             })
             .then((response) => {
+                toast.success("Completion received");
                 // append this to globalMessages : response.data.choices[0].message
                 messageHistory.push({
                     role: "assistant",
@@ -171,9 +165,7 @@ function App() {
 
                 //update savedChat messages
 
-                let activeChat = savedChats.find(
-                    (chat) => chat.uuid === activatedUUID
-                );
+                let activeChat = savedChats.find((chat) => chat.uuid === activatedUUID);
                 if (activeChat === undefined) {
                     activeChat = {
                         uuid: activatedUUID,
@@ -183,9 +175,7 @@ function App() {
                 activeChat.messages = messageHistory;
 
                 let assignedSavedChats = Object.assign([], savedChats);
-                let index = assignedSavedChats.findIndex(
-                    (chat) => chat.uuid === activatedUUID
-                );
+                let index = assignedSavedChats.findIndex((chat) => chat.uuid === activatedUUID);
 
                 if (index === -1) {
                     assignedSavedChats.push(activeChat);
@@ -194,10 +184,11 @@ function App() {
                 }
                 setSavedChats(assignedSavedChats);
 
-                localStorage.setItem(
-                    "savedChats",
-                    JSON.stringify(assignedSavedChats)
-                );
+                localStorage.setItem("savedChats", JSON.stringify(assignedSavedChats));
+            })
+            .catch((error) => {
+                toast.error(error.response.data.error.message);
+                console.log(error.response.data.error.message);
             })
             .finally(() => {
                 setLoading(false);
@@ -221,10 +212,10 @@ function App() {
 
     return (
         <>
-            <div
-                className={`relative z-10 ${openSettings ? "block" : "hidden"}`}
-                role="dialog"
-                aria-modal="true">
+            <div>
+                <Toaster />
+            </div>
+            <div className={`relative z-10 ${openSettings ? "block" : "hidden"}`} role="dialog" aria-modal="true">
                 <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
 
                 <div className="fixed inset-0 z-10 overflow-y-auto">
@@ -232,97 +223,71 @@ function App() {
                         <div className="relative transform overflow-hidden rounded-md bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg md:max-w-2xl">
                             <div className="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4 overflow-x-scroll">
                                 <div className="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left overflow-x-scroll">
-                                    <h3 className="text-base font-semibold leading-6 text-gray-900">
-                                        Settings
-                                    </h3>
+                                    <h3 className="text-base font-semibold leading-6 text-gray-900">Settings</h3>
                                     <div className="mt-2 overflow-x-scroll">
                                         <table className="table-fixed overflow-x-scroll">
                                             <thead>
                                                 <tr>
-                                                    <th className="px-4 py-2">
-                                                        Select
-                                                    </th>
-                                                    <th className="px-4 py-2">
-                                                        Proxy
-                                                    </th>
-                                                    <th className="px-4 py-2">
-                                                        Returned
-                                                    </th>
+                                                    <th className="px-4 py-2">Select</th>
+                                                    <th className="px-4 py-2">Proxy</th>
+                                                    <th className="px-4 py-2">Returned</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
                                                 {settings &&
                                                     settings?.proxies &&
                                                     initLoading === false &&
-                                                    settings.proxies?.map(
-                                                        (proxy, index) => (
-                                                            <tr key={index}>
-                                                                <td
-                                                                    className="px-4 py-2 cursor-pointer"
-                                                                    onClick={() => {
-                                                                        if (
-                                                                            proxy.status ===
-                                                                                200 &&
-                                                                            assignedProxy?.proxy !==
-                                                                                proxy.proxy
-                                                                        ) {
-                                                                            setAssignedProxy(
-                                                                                {
-                                                                                    proxy: proxy.proxy,
-                                                                                    status: proxy.status,
-                                                                                }
-                                                                            );
-                                                                        }
-                                                                    }}>
-                                                                    {assignedProxy?.proxy ===
-                                                                    proxy.proxy ? (
-                                                                        <svg
-                                                                            xmlns="http://www.w3.org/2000/svg"
-                                                                            className="h-6 w-6 stroke-lime-500 hover:stroke-lime-800"
-                                                                            fill="none"
-                                                                            viewBox="0 0 24 24">
-                                                                            <path
-                                                                                strokeLinecap="round"
-                                                                                strokeLinejoin="round"
-                                                                                strokeWidth={
-                                                                                    2
-                                                                                }
-                                                                                d="M5 13l4 4L19 7"
-                                                                            />
-                                                                        </svg>
-                                                                    ) : (
-                                                                        <svg
-                                                                            xmlns="http://www.w3.org/2000/svg"
-                                                                            className={`h-6 w-6 ${
-                                                                                proxy.status ===
-                                                                                200
-                                                                                    ? "stroke-slate-950 hover:stroke-slate-500"
-                                                                                    : "stroke-red-500 hover:stroke-red-800"
-                                                                            }`}
-                                                                            fill="none"
-                                                                            viewBox="0 0 24 24">
-                                                                            <path
-                                                                                strokeLinecap="round"
-                                                                                strokeLinejoin="round"
-                                                                                strokeWidth={
-                                                                                    2
-                                                                                }
-                                                                                d="M6 18L18 6M6 6l12 12"
-                                                                            />
-                                                                        </svg>
-                                                                    )}
-                                                                </td>
-                                                                <td className="text-sm">
-                                                                    {
-                                                                        proxy.proxy
+                                                    settings.proxies?.map((proxy, index) => (
+                                                        <tr key={index}>
+                                                            <td
+                                                                className="px-4 py-2 cursor-pointer"
+                                                                onClick={() => {
+                                                                    if (
+                                                                        proxy.status === 200 &&
+                                                                        assignedProxy?.proxy !== proxy.proxy
+                                                                    ) {
+                                                                        setAssignedProxy({
+                                                                            proxy: proxy.proxy,
+                                                                            status: proxy.status,
+                                                                        });
                                                                     }
-                                                                </td>
-                                                                <td className="text-sm">
-                                                                    {proxy.status.toString()}
-                                                                </td>
-                                                            </tr>
-                                                        )
-                                                    )}
+                                                                }}>
+                                                                {assignedProxy?.proxy === proxy.proxy ? (
+                                                                    <svg
+                                                                        xmlns="http://www.w3.org/2000/svg"
+                                                                        className="h-6 w-6 stroke-lime-500 hover:stroke-lime-800"
+                                                                        fill="none"
+                                                                        viewBox="0 0 24 24">
+                                                                        <path
+                                                                            strokeLinecap="round"
+                                                                            strokeLinejoin="round"
+                                                                            strokeWidth={2}
+                                                                            d="M5 13l4 4L19 7"
+                                                                        />
+                                                                    </svg>
+                                                                ) : (
+                                                                    <svg
+                                                                        xmlns="http://www.w3.org/2000/svg"
+                                                                        className={`h-6 w-6 ${
+                                                                            proxy.status === 200
+                                                                                ? "stroke-slate-950 hover:stroke-slate-500"
+                                                                                : "stroke-red-500 hover:stroke-red-800"
+                                                                        }`}
+                                                                        fill="none"
+                                                                        viewBox="0 0 24 24">
+                                                                        <path
+                                                                            strokeLinecap="round"
+                                                                            strokeLinejoin="round"
+                                                                            strokeWidth={2}
+                                                                            d="M6 18L18 6M6 6l12 12"
+                                                                        />
+                                                                    </svg>
+                                                                )}
+                                                            </td>
+                                                            <td className="text-sm">{proxy.proxy}</td>
+                                                            <td className="text-sm">{proxy.status.toString()}</td>
+                                                        </tr>
+                                                    ))}
                                             </tbody>
                                         </table>
                                     </div>
@@ -332,9 +297,7 @@ function App() {
                                 <button
                                     type="button"
                                     className="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto"
-                                    onClick={() =>
-                                        setOpenSettings(!openSettings)
-                                    }>
+                                    onClick={() => setOpenSettings(!openSettings)}>
                                     Close
                                 </button>
                             </div>
@@ -345,9 +308,7 @@ function App() {
             <div className="w-full bg-main min-h-12 py-4 sticky top-0">
                 <div className="flex justify-between items-center h-full">
                     <div className="flex items-center">
-                        <h1 className="text-white text-2xl ml-4">
-                            Chatbot interface
-                        </h1>
+                        <h1 className="text-white text-2xl ml-4">Chatbot interface</h1>
                     </div>
                     <div className="flex items-center">
                         <button
@@ -382,12 +343,8 @@ function App() {
                         <>
                             <div className="flex flex-col items-center justify-center mt-8 mx-4 mb-6">
                                 <div className="flex flex-col items-center justify-center">
-                                    <h1 className="text-2xl font-bold text-white">
-                                        Saved chats
-                                    </h1>
-                                    <p className="text-white">
-                                        Click on a chat to view it
-                                    </p>
+                                    <h1 className="text-2xl font-bold text-white">Saved chats</h1>
+                                    <p className="text-white">Click on a chat to view it</p>
                                 </div>
                             </div>
                             <div className="flex flex-col items-center justify-center mt-8 mx-4 mb-6">
@@ -399,103 +356,92 @@ function App() {
                                             setNotStarted(false);
                                             setActiveChatID(chat.uuid);
                                             // load chat messages from localstorage into state
-                                            let parsedMSGS = JSON.parse(
-                                                localStorage.getItem(
-                                                    "savedChats"
-                                                )
-                                            ).find((findChat) => {
-                                                return (
-                                                    findChat.uuid === chat.uuid
-                                                );
-                                            }).messages;
+                                            let parsedMSGS = JSON.parse(localStorage.getItem("savedChats")).find(
+                                                (findChat) => {
+                                                    return findChat.uuid === chat.uuid;
+                                                }
+                                            ).messages;
 
                                             setGlobalMessages(parsedMSGS);
                                         }}>
-                                          <div className="flex flex-col">
-                                        <h1 className="text-md font-bold text-white">
-                                          {chat.name ? chat.name : chat.uuid}
-                                        </h1>
-                                        <p className="text-white text-sm">
-                                            {chat.messages.length -1} messages
-                                        </p>
+                                        <div className="flex flex-col">
+                                            <h1 className="text-md font-bold text-white">
+                                                {chat.name ? chat.name : chat.uuid}
+                                            </h1>
+                                            <p className="text-white text-sm">{chat.messages.length - 1} messages</p>
                                         </div>
                                         <div className="flex flex-row items-center justify-center">
-                                          <button className="bg-btn text-xs py-2 px-4 rounded-md mr-4 mt-4" onClick={() => {
-                                              let parsedMSGS = JSON.parse(
-                                                localStorage.getItem(
-                                                    "savedChats"
-                                                )
-                                            ).find((findChat) => {
-                                                return (
-                                                    findChat.uuid === chat.uuid
-                                                );
-                                            }).messages;
-                                            let dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(parsedMSGS));
-                                            let downloadAnchorNode = document.createElement('a');
-                                            downloadAnchorNode.setAttribute("href",     dataStr);
-                                            downloadAnchorNode.setAttribute("download", chat.name + ".json");
-                                            document.body.appendChild(downloadAnchorNode); // required for firefox
-                                            downloadAnchorNode.click();
-                                            downloadAnchorNode.remove();
-                                          }}>
-                                            ⬇️
-                                          </button>
+                                            <button
+                                                className="bg-btn text-xs py-2 px-4 rounded-md mr-4 mt-4"
+                                                onClick={() => {
+                                                    let parsedMSGS = JSON.parse(
+                                                        localStorage.getItem("savedChats")
+                                                    ).find((findChat) => {
+                                                        return findChat.uuid === chat.uuid;
+                                                    }).messages;
+                                                    let dataStr =
+                                                        "data:text/json;charset=utf-8," +
+                                                        encodeURIComponent(JSON.stringify(parsedMSGS));
+                                                    let downloadAnchorNode = document.createElement("a");
+                                                    downloadAnchorNode.setAttribute("href", dataStr);
+                                                    downloadAnchorNode.setAttribute("download", chat.name + ".json");
+                                                    document.body.appendChild(downloadAnchorNode); // required for firefox
+                                                    downloadAnchorNode.click();
+                                                    downloadAnchorNode.remove();
+                                                }}>
+                                                ⬇️
+                                            </button>
 
-                                          <button className="bg-btn  text-xs py-2 px-4 rounded-md mr-4 mt-4" onClick={() => {
-                                            let parsedMSGS = JSON.parse(
-                                                localStorage.getItem(
-                                                    "savedChats"
-                                                ) 
-                                            ).filter((findChat) => {
-
-                                                return (
-                                                    findChat.uuid !== chat.uuid
-                                                );
-                                            });
-                                            localStorage.setItem("savedChats", JSON.stringify(parsedMSGS));
-                                            setSavedChats(parsedMSGS);
-                                          }}>
-                                            ❌
-                                          </button>
-                                          </div>
+                                            <button
+                                                className="bg-btn  text-xs py-2 px-4 rounded-md mr-4 mt-4"
+                                                onClick={() => {
+                                                    let parsedMSGS = JSON.parse(
+                                                        localStorage.getItem("savedChats")
+                                                    ).filter((findChat) => {
+                                                        return findChat.uuid !== chat.uuid;
+                                                    });
+                                                    localStorage.setItem("savedChats", JSON.stringify(parsedMSGS));
+                                                    setSavedChats(parsedMSGS);
+                                                }}>
+                                                ❌
+                                            </button>
+                                        </div>
                                     </div>
                                 ))}
 
                                 <div className="flex flex-row justify-between w-full mb-4 p-4 rounded-md cursor-pointer border-white border">
-                                    <button className="bg-btn text-white font-bold py-2 px-4 rounded-md mr-4" onClick={() => {
-                                        let parsedMSGS = JSON.parse(
-                                            localStorage.getItem(
-                                                "savedChats"
-                                            )
-                                        );
-                                        let dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(parsedMSGS));
-                                        let downloadAnchorNode = document.createElement('a');
-                                        downloadAnchorNode.setAttribute("href",     dataStr);
-                                        downloadAnchorNode.setAttribute("download", "savedChats.json");
-                                        document.body.appendChild(downloadAnchorNode); // required for firefox
-                                        downloadAnchorNode.click();
-                                        downloadAnchorNode.remove();
-                                    }}>
+                                    <button
+                                        className="bg-btn text-white font-bold py-2 px-4 rounded-md mr-4"
+                                        onClick={() => {
+                                            let parsedMSGS = JSON.parse(localStorage.getItem("savedChats"));
+                                            let dataStr =
+                                                "data:text/json;charset=utf-8," +
+                                                encodeURIComponent(JSON.stringify(parsedMSGS));
+                                            let downloadAnchorNode = document.createElement("a");
+                                            downloadAnchorNode.setAttribute("href", dataStr);
+                                            downloadAnchorNode.setAttribute("download", "savedChats.json");
+                                            document.body.appendChild(downloadAnchorNode); // required for firefox
+                                            downloadAnchorNode.click();
+                                            downloadAnchorNode.remove();
+                                        }}>
                                         ⬇️ all chats
                                     </button>
-                                    <button className="bg-btn text-white font-bold py-2 px-4 rounded-md mr-4" onClick={() => {
-                                        localStorage.setItem("savedChats", JSON.stringify([]));
-                                        setSavedChats([]);
-                                    }}>
+                                    <button
+                                        className="bg-btn text-white font-bold py-2 px-4 rounded-md mr-4"
+                                        onClick={() => {
+                                            localStorage.setItem("savedChats", JSON.stringify([]));
+                                            setSavedChats([]);
+                                        }}>
                                         ❌ all chats
                                     </button>
-                                    </div>
+                                </div>
                             </div>
                         </>
                     ) : (
                         <div className="flex flex-col items-center justify-center mt-8 mx-4 mb-6">
                             <div className="flex flex-col items-center justify-center">
-                                <h1 className="text-2xl font-bold text-white">
-                                    No saved chats
-                                </h1>
-                                <p className="text-white">
-                                    Start a chat to view it listed here
-                                </p>
+                                <h1 className="text-2xl font-bold text-white">No saved chats</h1>
+                                <p className="text-white">Start a chat to view it listed here</p>
                             </div>
                         </div>
                     )}
@@ -506,17 +452,12 @@ function App() {
                         <>
                             <div className="flex flex-col items-center justify-center mt-8 mx-4 mb-6">
                                 <div className="flex flex-col items-center justify-center">
-                                    <h1 className="text-2xl font-bold text-slate-900">
-                                        Start a conversation
-                                    </h1>
-                                    <p className="text-slate-900">
-                                        Choose a preset, or edit the system
-                                        prompt
-                                    </p>
+                                    <h1 className="text-2xl font-bold text-slate-900">Start a conversation</h1>
+                                    <p className="text-slate-900">Choose a preset, or edit the system prompt</p>
                                 </div>
                             </div>
                             <div className="w-full justify-around p-4">
-                                <div className="grid grid-cols-5 gap-x-4 gap-y-4">
+                                <div className="grid xs:grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-4 gap-y-4">
                                     <div
                                         className="border border-stone-700 rounded-md p-2 cursor-pointer"
                                         onClick={() => {
@@ -530,23 +471,14 @@ function App() {
                                         }}>
                                         Programmer Companion <br />
                                         <i className="text-xs">
-                                            You are a professional programmer
-                                            companion AI. You will follow user
-                                            requests in order to prepare various
-                                            programming and coding tasks for the
-                                            user. You will separate each
-                                            function in its own code block when
-                                            returning it to the user, and you
-                                            will closely follow users
-                                            instructions for coding and
-                                            preparing code. You may be asked by
-                                            users to provide algorithms or
-                                            solutions to technical problems. You
-                                            will advise the user as well as
-                                            prepare boilerplate code for the
-                                            user when asked do to so. Generally,
-                                            you will prepare code, and only
-                                            offer comments if asked to do so.
+                                            You are a professional programmer companion AI. You will follow user
+                                            requests in order to prepare various programming and coding tasks for the
+                                            user. You will separate each function in its own code block when returning
+                                            it to the user, and you will closely follow users instructions for coding
+                                            and preparing code. You may be asked by users to provide algorithms or
+                                            solutions to technical problems. You will advise the user as well as prepare
+                                            boilerplate code for the user when asked do to so. Generally, you will
+                                            prepare code, and only offer comments if asked to do so.
                                         </i>
                                     </div>
                                     <div
@@ -562,17 +494,11 @@ function App() {
                                         }}>
                                         Solidity Auditor <br />
                                         <i className="text-xs">
-                                            You are a professional Solidity
-                                            Auditing AI. You Audit the smart
-                                            contracts and functions in solidity
-                                            that the users will send. For all
-                                            input information from the user, you
-                                            will do your best to provide a
-                                            security and best-practices audit
-                                            that will be as useful as possible.
-                                            Give lots of examples and
-                                            explanations why some course of
-                                            action is better.
+                                            You are a professional Solidity Auditing AI. You Audit the smart contracts
+                                            and functions in solidity that the users will send. For all input
+                                            information from the user, you will do your best to provide a security and
+                                            best-practices audit that will be as useful as possible. Give lots of
+                                            examples and explanations why some course of action is better.
                                         </i>
                                     </div>
                                     <div
@@ -588,15 +514,10 @@ function App() {
                                         }}>
                                         Screenwriting AI <br />
                                         <i className="text-xs">
-                                            You are a professional screenwriting
-                                            AI. You will follow the instructions
-                                            based on the requests of the user,
-                                            and will follow the specific themes
-                                            required. For all input information
-                                            from the user, you will do your best
-                                            to provide a screenplay that is as
-                                            close to the user's request as
-                                            possible.
+                                            You are a professional screenwriting AI. You will follow the instructions
+                                            based on the requests of the user, and will follow the specific themes
+                                            required. For all input information from the user, you will do your best to
+                                            provide a screenplay that is as close to the user's request as possible.
                                         </i>
                                     </div>
                                     <div
@@ -612,17 +533,11 @@ function App() {
                                         }}>
                                         E-mail AI <br />
                                         <i className="text-xs">
-                                            You are a highly capable AI that
-                                            writes personal and professional
-                                            communication. You will follow the
-                                            instructions based on the requests
-                                            of the user, and write emails, in
-                                            the tone, cadence and style
-                                            requested by the user. If the user
-                                            doesn't specify a style, you will
-                                            use your best judgement to write the
-                                            email in a way that is appropriate
-                                            for the situation.
+                                            You are a highly capable AI that writes personal and professional
+                                            communication. You will follow the instructions based on the requests of the
+                                            user, and write emails, in the tone, cadence and style requested by the
+                                            user. If the user doesn't specify a style, you will use your best judgement
+                                            to write the email in a way that is appropriate for the situation.
                                         </i>
                                     </div>
                                     <div
@@ -638,16 +553,11 @@ function App() {
                                         }}>
                                         Social Media Italian <br />
                                         <i className="text-xs">
-                                            You are a social media description
-                                            copywriting AI. You will follow the
-                                            instructions based on brand, and
-                                            wording of the posts that need
-                                            description. For each post you are
-                                            asked for, you will provide short or
-                                            long descriptions based on user
-                                            request. Additionally also provide
-                                            versions of the descriptions
-                                            translated into Italian.
+                                            You are a social media description copywriting AI. You will follow the
+                                            instructions based on brand, and wording of the posts that need description.
+                                            For each post you are asked for, you will provide short or long descriptions
+                                            based on user request. Additionally also provide versions of the
+                                            descriptions translated into Italian.
                                         </i>
                                     </div>
                                     <div
@@ -663,12 +573,9 @@ function App() {
                                         }}>
                                         Business process <br />
                                         <i className="text-xs">
-                                            You are an AI that helps in business
-                                            processes. You will assist the user
-                                            in writing business proposals, and
-                                            other documents as requested, please
-                                            keep commentary to the bare minimum
-                                            needed.
+                                            You are an AI that helps in business processes. You will assist the user in
+                                            writing business proposals, and other documents as requested, please keep
+                                            commentary to the bare minimum needed.
                                         </i>
                                     </div>
                                 </div>
@@ -689,8 +596,7 @@ function App() {
                                         ? "bg-yellow-100"
                                         : "bg-slate-100"
                                 }`}>
-                                {message.role === "system" &&
-                                notStarted === true ? (
+                                {message.role === "system" && notStarted === true ? (
                                     <>
                                         <i>[editable]</i>
                                         <br />
@@ -706,28 +612,18 @@ function App() {
                                     <b>System:</b>
                                 )}
                                 {/* if editable, double click to edit message.content */}
-                                {message.role === "system" &&
-                                notStarted === true ? (
+                                {message.role === "system" && notStarted === true ? (
                                     <>
                                         <p
                                             onDoubleClick={(e) => {
                                                 e.target.contentEditable = true;
                                             }}
                                             onKeyPress={(e) => {
-                                                if (
-                                                    e.key === "Enter" &&
-                                                    e.target.contentEditable
-                                                ) {
+                                                if (e.key === "Enter" && e.target.contentEditable) {
                                                     // update globalMessages
-                                                    let messageHistory =
-                                                        globalMessages;
-                                                    messageHistory[
-                                                        index
-                                                    ].content =
-                                                        e.target.innerText;
-                                                    setGlobalMessages(
-                                                        messageHistory.slice(0)
-                                                    );
+                                                    let messageHistory = globalMessages;
+                                                    messageHistory[index].content = e.target.innerText;
+                                                    setGlobalMessages(messageHistory.slice(0));
                                                     e.target.contentEditable = false;
                                                 }
                                             }}>
@@ -735,10 +631,7 @@ function App() {
                                         </p>
                                     </>
                                 ) : (
-                                    <ReactMarkdown
-                                        children={message.content}
-                                        rehypePlugins={[rehypeHighlight]}
-                                    />
+                                    <ReactMarkdown children={message.content} rehypePlugins={[rehypeHighlight]} />
                                 )}
                             </div>
                         );

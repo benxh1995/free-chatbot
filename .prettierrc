@@ -3,5 +3,6 @@
   "useTabs": false,
   "bracketSameLine": true,
   "arrowParens": "always",
-  "singleAttributePerLine": false
+  "singleAttributePerLine": false,
+  "printWidth": 120
 }
