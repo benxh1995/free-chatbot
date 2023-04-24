@@ -187,8 +187,12 @@ function App() {
                 localStorage.setItem("savedChats", JSON.stringify(assignedSavedChats));
             })
             .catch((error) => {
+                if(error.response.data.error.message.includes("This model's maximum context length is")){
+                    toast.error("Please summarize the chat and try again, as you've hit the token limit")
+                }
+                else{
                 toast.error(error.response.data.error.message);
-                console.log(error.response.data.error.message);
+                }
             })
             .finally(() => {
                 setLoading(false);
