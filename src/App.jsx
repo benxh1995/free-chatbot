@@ -16,6 +16,7 @@ function App() {
     const [typedMessage, setTypedMessage] = useState("");
     const [savedChats, setSavedChats] = useState([]);
     const [activeChatID, setActiveChatID] = useState(null);
+    const [activeChat, setActiveChat] = useState(null);
     const [assignedProxy, setAssignedProxy] = useState(null);
     const [globalMessages, setGlobalMessages] = useState([
         {
@@ -104,6 +105,7 @@ function App() {
             };
             setActiveChatID(chatObj.uuid);
             activatedUUID = chatObj.uuid;
+            setActiveChat(chatObj);
             setSavedChats([...savedChats, chatObj]);
             localStorage.setItem("savedChats", JSON.stringify([...savedChats, chatObj]));
         }
@@ -140,6 +142,7 @@ function App() {
         setSavedChats(assignedSavedChats);
 
         localStorage.setItem("savedChats", JSON.stringify(assignedSavedChats));
+
         if (activeChat.name === undefined) {
             let name = await generateName(messageHistory);
             activeChat.name = name;
@@ -147,7 +150,21 @@ function App() {
             setSavedChats(assignedSavedChats);
             localStorage.setItem("savedChats", JSON.stringify(assignedSavedChats));
         }
-        // then send POST request to proxies[3]
+
+        // if there is a summary, replace whole message history after [0] with summary and ask bot to continue from there
+        let summaryBool = activeChat !== null && activeChat.summary !== undefined;
+        let trueMessageHistory = messageHistory;
+        if (summaryBool) {
+            messageHistory = messageHistory.slice(0, 1);
+            messageHistory.push({
+                role: "assistant",
+                content: "The summary so far:" + activeChat.summary,
+            });
+            messageHistory.push({
+                role: "user",
+                content: message,
+            });
+        }
 
         let postRequest = await axios
             .post(assignedProxy.proxy + "/chat/completions", {
@@ -157,11 +174,11 @@ function App() {
             .then((response) => {
                 toast.success("Completion received");
                 // append this to globalMessages : response.data.choices[0].message
-                messageHistory.push({
+                trueMessageHistory.push({
                     role: "assistant",
                     content: response.data.choices[0].message.content,
                 });
-                setGlobalMessages(messageHistory.slice(0));
+                setGlobalMessages(trueMessageHistory.slice(0));
 
                 //update savedChat messages
 
@@ -172,7 +189,7 @@ function App() {
                         messages: [],
                     };
                 }
-                activeChat.messages = messageHistory;
+                activeChat.messages = trueMessageHistory;
 
                 let assignedSavedChats = Object.assign([], savedChats);
                 let index = assignedSavedChats.findIndex((chat) => chat.uuid === activatedUUID);
@@ -187,11 +204,10 @@ function App() {
                 localStorage.setItem("savedChats", JSON.stringify(assignedSavedChats));
             })
             .catch((error) => {
-                if(error.response.data.error.message.includes("This model's maximum context length is")){
-                    toast.error("Please summarize the chat and try again, as you've hit the token limit")
-                }
-                else{
-                toast.error(error.response.data.error.message);
+                if (error.response.data.error.message.includes("This model's maximum context length is")) {
+                    toast.error("Please summarize the chat and try again, as you've hit the token limit");
+                } else {
+                    toast.error(error.response.data.error.message);
                 }
             })
             .finally(() => {
@@ -213,6 +229,61 @@ function App() {
     }, []);
 
     // The second step is to load the proxy list into the settings
+
+    const summarize = async () => {
+        // ask the proxy to summarize the conversation so far, replace the rest of the messages other than the first system prompt, with the summary as the last message, while keeping in chat history the real text responses.
+
+        await summarizeCompletion();
+    };
+
+    const summarizeCompletion = async () => {
+        // this only works on existing conversations
+        if (activeChatID !== null) {
+            // get all chat history and ask for summary
+            let messageHistory = globalMessages;
+            messageHistory.push({
+                role: "user",
+                content: "Summarize the conversation so far",
+            });
+
+            messageHistory[0].content = "Summarize the conversation so far";
+
+            // send POST request to proxy
+            let summary = await axios
+                .post(assignedProxy.proxy + "/chat/completions", {
+                    model: modelName,
+                    messages: messageHistory,
+                })
+                .then((response) => {
+                    toast.success("Summary received");
+                    return response.data.choices[0].message.content;
+                })
+                .catch((error) => {
+                    toast.error(error.response.data.error.message);
+                });
+            // replace all messages after the first system prompt with the summary
+
+            let savedChatsCopy = Object.assign([], savedChats);
+            // add to chatObj
+            let activeChat = savedChatsCopy.find((chat) => chat.uuid === activeChatID);
+            if (activeChat === undefined) {
+                return toast.error("Please start a conversation first");
+            }
+            activeChat.summary = summary;
+            let index = savedChatsCopy.findIndex((chat) => chat.uuid === activeChatID);
+            if (index === -1) {
+                savedChatsCopy.push(activeChat);
+            } else {
+                savedChatsCopy[index] = activeChat;
+            }
+
+            console.log("savedChatsCopy", savedChatsCopy);
+            console.log("activeChat", activeChat);
+            setSavedChats(savedChatsCopy);
+
+            localStorage.setItem("savedChats", JSON.stringify(savedChatsCopy));
+        }
+    };
 
     return (
         <>
@@ -359,6 +430,7 @@ function App() {
                                         onClick={() => {
                                             setNotStarted(false);
                                             setActiveChatID(chat.uuid);
+                                            setActiveChat(chat);
                                             // load chat messages from localstorage into state
                                             let parsedMSGS = JSON.parse(localStorage.getItem("savedChats")).find(
                                                 (findChat) => {
@@ -640,6 +712,26 @@ function App() {
                             </div>
                         );
                     })}
+                    {!loading && globalMessages.length > 5 && (
+                        <div className="m-2 md:m-4 p-2 md:p-4 border border-slate-900 bg-cyan-100 rounded-md">
+                            <button
+                                onClick={() => summarize()}
+                                className="bg-btn text-white font-bold py-2 px-4 rounded-md">
+                                Summarize this conversation
+                            </button>
+                        </div>
+                    )}
+                    {activeChat && activeChat.summary ? (
+                        <div
+                            key="summary"
+                            className={`rounded-md m-2 md:m-4 p-2 md:p-4 border border-slate-900 bg-cyan-100`}>
+                            <b>Summary:</b>
+                            <ReactMarkdown children={activeChat.summary} rehypePlugins={[rehypeHighlight]} />
+                        </div>
+                    ) : (
+                        ""
+                    )}
+
                     {loading && (
                         <div className="m-2 md:m-4 p-2 md:p-4 border border-slate-900 bg-yellow-100 rounded-md">
                             <b>Assistant:</b> <i>Thinking...</i>
