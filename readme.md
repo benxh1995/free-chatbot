@@ -30,6 +30,7 @@ Either:
 - [] Implement LangChain
 - [] Implement Memory Module (summary of the conversation after n-turns, or/and after reaching x tokens in total, in order to lower the number of context tokens, and addittionaly, a special kind of "task list" memory)
 - [] Implement "tool" use (e.g. summarization, browsing the internet, using code, using calculators, etc)
+- [x] implement summarization for simulcra of long term memory (needs to handle updates of summarization after given message -- now just updates conversation, but cant re-summarize after token limit)
 
 ## How to use
 ```
